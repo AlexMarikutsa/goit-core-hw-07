@@ -1,5 +1,9 @@
 from classes import AddressBook, AppException, Phone, Record
 
+# constants
+EXIT = "exit"
+CLOSE = "close"
+ERROR_MESSAGE = "Invalid command."
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -13,12 +17,15 @@ def input_error(func):
             return "Give me name and phone please."
         except IndexError:
             return "Incomplete input. Please provide all required arguments."
+
     return inner
+
 
 def parse_input(user_input):
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
+
 
 @input_error
 def add_birthday(args, book: AddressBook):
@@ -26,9 +33,10 @@ def add_birthday(args, book: AddressBook):
         name, birthday = args
     except ValueError:
         raise AppException(f"Give me name and birthday in format DD.MM.YYYY.")
-    
+
     book.add_birthday(name, birthday)
     return f"Birthday for {name} added: {birthday}"
+
 
 @input_error
 def show_birthday(args, book: AddressBook):
@@ -39,7 +47,8 @@ def show_birthday(args, book: AddressBook):
         return "Contact not found."
     if contact.birthday is None:
         return f"{contact.name.value} has no birthday set."
-    return f"{contact.name.value}'s birthday: {contact.birthday.value.strftime('%d.%m.%Y')}"
+    return f"{contact.name.value}'s birthday: {contact.birthday.value}"
+
 
 @input_error
 def add_contact(args, book: AddressBook):
@@ -54,6 +63,7 @@ def add_contact(args, book: AddressBook):
         record.add_phone(phone)
     return message
 
+
 @input_error
 def change_contact(args, book: AddressBook):
     name, phone = args
@@ -66,6 +76,7 @@ def change_contact(args, book: AddressBook):
 
     return "Contact updated"
 
+
 @input_error
 def show_phone(args, book: AddressBook):
     if not args:
@@ -75,7 +86,8 @@ def show_phone(args, book: AddressBook):
     if record is None:
         return "Contact not found."
     return f"{record.name.value}'s phone: {', '.join(phone.value for phone in record.phones)}"
-    
+
+
 def show_all(book: AddressBook):
     if not book.data:
         return "Contacts are empty."
@@ -86,50 +98,46 @@ def show_all(book: AddressBook):
 
     return contactsList
 
+
 def show_upcoming_birthdays(book: AddressBook):
     upcoming_birthdays = book.get_upcoming_birthdays(days=7)
     if not upcoming_birthdays:
         return "No upcoming birthdays in the next 7 days."
-    
-    return "\n".join(f"{item['name']}: {item['birthday']}" for item in upcoming_birthdays)
+
+    return "\n".join(
+        f"{item['name']}: {item['birthday']}" for item in upcoming_birthdays
+    )
+
 
 def main():
     book = AddressBook()
     print("Welcome to the assistant bot!")
     while True:
-        try:
-            user_input = input("Enter a command: ")
-            command, *args = parse_input(user_input)
+        user_input = input("Enter a command: ")
+        command, *args = parse_input(user_input)
 
-            match command:
-                case "close" | "exit":
-                    print("Good bye!")
-                    break
-                case "hello":
-                    print("How can I help you?")
-                case "add":
-                    print(add_contact(args, book))
-                case "change":
-                    print(change_contact(args, book))
-                case "phone":
-                    print(show_phone(args, book))
-                case "all":
-                    print(show_all(book))   
-                case "add-birthday":
-                    print(add_birthday(args, book)) 
-                case "show-birthday":
-                    print(show_birthday(args, book))
-                case "birthdays":
-                    print(show_upcoming_birthdays(book))
-                case _:
-                    print(ERROR_MESSAGE)
-        except ValueError as e:
-            print(e)
+        match command:
+            case "close" | "exit":
+                print("Good bye!")
+                break
+            case "hello":
+                print("How can I help you?")
+            case "add":
+                print(add_contact(args, book))
+            case "change":
+                print(change_contact(args, book))
+            case "phone":
+                print(show_phone(args, book))
+            case "all":
+                print(show_all(book))
+            case "add-birthday":
+                print(add_birthday(args, book))
+            case "show-birthday":
+                print(show_birthday(args, book))
+            case "birthdays":
+                print(show_upcoming_birthdays(book))
+            case _:
+                print(ERROR_MESSAGE)
 
-# constants
-EXIT = "exit"
-CLOSE = "close" 
-ERROR_MESSAGE = "Invalid command."   
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
