@@ -14,9 +14,11 @@ def input_error(func):
         except KeyError:
             return "Enter user name."
         except ValueError:
-            return "Give me name and phone please."
+            return "Incorrect input."
         except IndexError:
             return "Incomplete input. Please provide all required arguments."
+        except AttributeError:
+            return "Contact not found."
 
     return inner
 
@@ -29,24 +31,14 @@ def parse_input(user_input):
 
 @input_error
 def add_birthday(args, book: AddressBook):
-    try:
-        name, birthday = args
-    except ValueError:
-        raise AppException(f"Give me name and birthday in format DD.MM.YYYY.")
-
+    name, birthday = args    
     book.add_birthday(name, birthday)
     return f"Birthday for {name} added: {birthday}"
 
 
 @input_error
 def show_birthday(args, book: AddressBook):
-    if not args:
-        return "Give me name"
     contact = book.find(args[0])
-    if contact is None:
-        return "Contact not found."
-    if contact.birthday is None:
-        return f"{contact.name.value} has no birthday set."
     return f"{contact.name.value}'s birthday: {contact.birthday.value}"
 
 
@@ -68,8 +60,6 @@ def add_contact(args, book: AddressBook):
 def change_contact(args, book: AddressBook):
     name, phone = args
     record = book.find(name)
-    if record is None:
-        return "Contact not found."
 
     phone_new = Phone(phone)
     record.phone = [phone_new]
@@ -79,12 +69,8 @@ def change_contact(args, book: AddressBook):
 
 @input_error
 def show_phone(args, book: AddressBook):
-    if not args:
-        return "Invalid input data"
     name = args[0]
     record = book.find(name)
-    if record is None:
-        return "Contact not found."
     return f"{record.name.value}'s phone: {', '.join(phone.value for phone in record.phones)}"
 
 

@@ -36,13 +36,6 @@ class Birthday(Field):
         except (ValueError, TypeError):
             return False
 
-
-        # try:
-        #     self.value = datetime.strptime(value, "%d.%m.%Y").date()
-        # except (ValueError, AttributeError):
-        #     raise AppException("Invalid date format. Use DD.MM.YYYY")
-
-
 class Record:
     def __init__(self, name):
         self.name = Name(name)
@@ -50,7 +43,7 @@ class Record:
         self.birthday = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday.value if self.birthday else 'Not set'}"
     
     def add_phone(self, phone):
         self.phones.append(Phone(phone))
